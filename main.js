@@ -18,20 +18,20 @@ if (savegame !== null) {
 }
 
 function ResetLabels() {
-    document.getElementById("AtomsDisplay").innerHTML = gameStats.Atoms + " Atoms Formed"
-    document.getElementById("AtomGainDisplay").innerHTML = (gameStats.AtomGain * ((gameStats.Molecules / 2) + 1)) * ((gameStats.Ions * 2) + 1)+" Atoms every 1 second"
+    document.getElementById("AtomsDisplay").innerHTML = gameStats.Atoms.toFixed(2) + " Atoms Formed"
+    document.getElementById("AtomGainDisplay").innerHTML = ((gameStats.AtomGain * ((gameStats.Molecules / 2) + 1)) * ((gameStats.Ions * 2) + 1)).toFixed(2)+" Atoms every 1 second"
 
-    document.getElementById("MoleculesDisplay").innerHTML = gameStats.Molecules + " Molecules Formed"
-    document.getElementById("MoleculeButton").innerHTML = "Create a Molecule ("+ 6 * ((gameStats.Molecules + 1) * (gameStats.Molecules / 2) + 1) +" Atoms Required)"
+    document.getElementById("MoleculesDisplay").innerHTML = gameStats.Molecules.toFixed(2) + " Molecules Formed"
+    document.getElementById("MoleculeButton").innerHTML = "Create a Molecule ("+ (6 * ((gameStats.Molecules + 1) * (gameStats.Molecules / 2) + 1)).toFixed(2) +" Atoms Required)"
 
-    document.getElementById("IonsDisplay").innerHTML = gameStats.Ions + " Ions Constructed"
-    document.getElementById("IonButton").innerHTML = "Construct an Ion ("+5 * ((gameStats.Ions * gameStats.Ions) + 1)+" Molecules Required)"
+    document.getElementById("IonsDisplay").innerHTML = gameStats.Ions.toFixed(2) + " Ions Constructed"
+    document.getElementById("IonButton").innerHTML = "Construct an Ion ("+(5 * ((gameStats.Ions * gameStats.Ions) + 1)).toFixed(2)+" Molecules Required)"
 }
 
 function Reset1() {
     gameStats.Atoms = 0
     gameStats.AtomGain = 1
-    gameStats.Molecules = 1
+    gameStats.Molecules = 0
 }
 
 function FormAtom() {
