@@ -1,7 +1,10 @@
-// Form Atom Formula : (gameStats.AtomGain * ((gameStats.Molecules / 2) + 1)) * ((gameStats.Ions * 2) + 1)
+// Form Atom Formula : (gameStats.AtomGain * ((gameStats.Molecules / 2) + 1));
 
-// Molecule Cost Formula : 6 * ((gameStats.Molecules + 1) * (gameStats.Molecules / 2) + 1)
-// Ion Cost Formula : 5 * ((gameStats.Ions * gameStats.Ions) + 1)
+// Molecule Cost Formula : 10
+// Ion Cost Formula : 5
+
+// Molecule Formula : (0.75 * (gameStats.Atoms / (10 * (gameStats.Atoms / 15))))
+// Ion Formula : 0.4 * (gameStats.Molecules / (5 * (1 + (gameStats.Molecules / 2500))))
 
 var gameStats = {
     Atoms: 0,
@@ -10,61 +13,72 @@ var gameStats = {
     Molecules: 0,
 
     Ions: 0, // Rebirth
+
+    SaveName: "AtomicIncremental7",
 }   
 
-var savegame = JSON.parse(localStorage.getItem("AtomicIncremental3")) // Load Save
+var savegame = JSON.parse(localStorage.getItem(gameStats.SaveName)) // Load Save
 if (savegame !== null) {
     gameStats = savegame
 }
 
 function ResetLabels() {
-    document.getElementById("AtomsDisplay").innerHTML = gameStats.Atoms.toFixed(2) + " Atoms Formed"
-    document.getElementById("AtomGainDisplay").innerHTML = ((gameStats.AtomGain * ((gameStats.Molecules / 2) + 1)) * ((gameStats.Ions * 2) + 1)).toFixed(2)+" Atoms every 1 second"
+    document.getElementById("AtomsDisplay").innerHTML = gameStats.Atoms.toPrecision(2) + " Atoms Formed";
+    document.getElementById("AtomGainDisplay").innerHTML = (gameStats.AtomGain * ((gameStats.Molecules / 2) + 1)).toPrecision(2)+" Atoms every 1 second";
 
-    document.getElementById("MoleculesDisplay").innerHTML = gameStats.Molecules.toFixed(2) + " Molecules Formed"
-    document.getElementById("MoleculeButton").innerHTML = "Create a Molecule ("+ (6 * ((gameStats.Molecules + 1) * (gameStats.Molecules / 2) + 1)).toFixed(2) +" Atoms Required)"
+    document.getElementById("MoleculesDisplay").innerHTML = gameStats.Molecules.toPrecision(2) + " Molecules Formed (Boosting Atoms by "+((gameStats.Molecules / 2) + 1).toPrecision(2)+"x)";
+    document.getElementById("MoleculeButton").innerHTML = "Create "+((0.75 * (gameStats.Atoms / (10 * (1 + (gameStats.Atoms / 15000))))) * (1 + (gameStats.Ions / 4))).toPrecision(2)+" Molecules ("+(10).toPrecision(2)+" Atoms Required)";
 
-    document.getElementById("IonsDisplay").innerHTML = gameStats.Ions.toFixed(2) + " Ions Constructed"
-    document.getElementById("IonButton").innerHTML = "Construct an Ion ("+(5 * ((gameStats.Ions * gameStats.Ions) + 1)).toFixed(2)+" Molecules Required)"
+    document.getElementById("IonsDisplay").innerHTML = gameStats.Ions.toPrecision(2) + " Ions Constructed (Boosting Molecules by "+((gameStats.Ions / 4) + 1).toPrecision(2)+"x)";
+    document.getElementById("IonButton").innerHTML = "Construct "+(0.4 * (gameStats.Molecules / (5 * (1 + (gameStats.Molecules / 2500))))).toPrecision(2)+" Ions ("+(5).toPrecision(2)+" Molecules Required)";
 }
 
-function Reset1() {
-    gameStats.Atoms = 0
-    gameStats.AtomGain = 1
-    gameStats.Molecules = 0
+function Reset1() { // 1st prestige layer, (molecule)
+    gameStats.Atoms = 0;
+    gameStats.AtomGain = 1;
+}
+
+function Reset2() { // 2nd prestige layer, (ion)
+    Reset1();
+    gameStats.Molecules = 0;
+}
+
+function Reset3() { // 3rd prestige layer, (???)
+    Reset2();
+    gameStats.Ions = 0;
 }
 
 function FormAtom() {
-    gameStats.Atoms += (gameStats.AtomGain * ((gameStats.Molecules / 2) + 1)) * ((gameStats.Ions * 2) + 1)
-    ResetLabels()
+    gameStats.Atoms += (gameStats.AtomGain * ((gameStats.Molecules / 2) + 1)); // 0.01 * 0.5x every Molecule
+    ResetLabels();
 }
 
 function CreateMolecule() {
-    let CostOfUpgrade = 6 * ((gameStats.Molecules + 1) * (gameStats.Molecules / 2) + 1);
-    if (gameStats.Atoms >= CostOfUpgrade) { // Costs Atoms
-        gameStats.Atoms -= CostOfUpgrade
-        gameStats.Molecules += 1 * ((gameStats.Ions / 4) + 1)
-        CostOfUpgrade = 10 * (gameStats.Molecules);
-        ResetLabels()
+    if (gameStats.Atoms >= 10) { // Costs atleast 10 Atoms
+        gameStats.Molecules += ((0.75 * (gameStats.Atoms / (10 * (1 + (gameStats.Atoms / 15000))))) * (1 + (gameStats.Ions / 4))); // 
+        Reset1();
+        ResetLabels();
     }
 }
 
 function ConstructIon() { // Rebirth, (2x to Atoms, 1.25x to Molecules) per
-    let CostOfUpgrade = 5 * ((gameStats.Ions * gameStats.Ions) + 1);
-    if (gameStats.Molecules >= CostOfUpgrade) { // Costs Molecules
-        gameStats.Ions += 1
-        Reset1()
-        CostOfUpgrade = 10 * (gameStats.Ions * gameStats.Ions);
-        ResetLabels()
+    if (gameStats.Molecules >= 5) { // Costs atleast 5 Molecules
+        gameStats.Ions += 0.4 * (gameStats.Molecules / (5 * (1 + (gameStats.Molecules / 2500)))); // 
+        Reset2();
+        ResetLabels();
     }
 }
 
+function SaveGame() {
+    localStorage.setItem(gameStats.SaveName, JSON.stringify(gameStats));
+}
+
 var mainGameLoop = window.setInterval(function() {
-    FormAtom()
+    FormAtom();
   }, 1000) // 1000 ms, 1 second
 
   var saveGameLoop = window.setInterval(function() { // Save every 10 seconds.
-    localStorage.setItem("AtomicIncremental3", JSON.stringify(gameStats))
-  }, 10000)
+    SaveGame();
+  }, 30000) // 30000 ms, 30 seconds
 
-ResetLabels()
+ResetLabels();
